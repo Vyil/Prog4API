@@ -1,0 +1,19 @@
+{
+  "name": "prog4api",
+  "version": "1.0.0",
+  "description": "",
+  "main": "test.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Vyil/Prog4API.git"
+  },
+  "author": "Djim&Ayman",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Vyil/Prog4API/issues"
+  },
+  "homepage": "https://github.com/Vyil/Prog4API#readme"
+}
