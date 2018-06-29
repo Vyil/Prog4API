@@ -168,9 +168,52 @@ function editSpul(req, res) {
 
 }
 
-module.exports = {
-    getAllSpullen,
-    addSpullen,
-    getSpulByID,
-    editSpul
+function deleteSpul(req, res) {
+    let token = req.get('Authorization')
+    let removeBearer = token.substr(7)
+    let id = auth.decodeToken(removeBearer)
+
+    let categorieID = req.params.id || ''
+    let spulID = req.params.spullid || ''
+
+    if (!token) {
+        res.status(401).json(new ApiResponse(401, 'Niet geautoriseerd (geen valid token)')).end()
+        return
+    }
+
+    db.query('SELECT * FROM categorie WHERE ID =?', [categorieID], function (error, rows, fields) {
+            if (!rows[0]) {
+                res.status(404).json(new ApiResponse(404, 'Niet gevonden (categorieId bestaat niet)')).end()
+                return
+            } else {
+                db.query('SELECT * FROM spullen WHERE ID = ?', [spulID], function (err, row, field) {
+                        if (!row[0]) {
+                            res.status(404).json(new ApiResponse(404, 'Niet gevonden (spullenID bestaat niet)')).end()
+                            return
+                        } else {
+                            if (!row[0].UserID == id.sub) {
+                                res.status(409).json(new ApiResponse(409, 'Conflict (Gebruiker mag deze data niet wijzigen)')).end()
+                                return
+                            } else {
+                                db.query('DELETE FROM spullen WHERE ID = ?',[spulID], function(err,row,field){
+                                    if(err){
+                                        res.status(500).json(new ApiResponse(500, err))
+                                    }else{
+                                        res.status(200).json(new ApiResponse(200, 'Verwijderd spul met ID: '+ spulID)).end()
+                                    }
+                                })
+                            }
+                        }
+                        
+                })
+            }
+    })
 }
+
+    module.exports = {
+        getAllSpullen,
+        addSpullen,
+        getSpulByID,
+        editSpul,
+        deleteSpul
+    }
