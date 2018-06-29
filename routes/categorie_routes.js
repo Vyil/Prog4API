@@ -1,7 +1,8 @@
 let routes = require('express').Router()
 let catg = require('../controller/categorie_controller')
 
-routes.get('/categorie',catg.getAllCategories)
-routes.post('/categorie', catg.makeCategorie)
+routes.get('/',catg.getAllCategories)
+routes.post('/', catg.makeCategorie)
+routes.get('/:id',catg.getCategorieByID)
 
 module.exports = routes
