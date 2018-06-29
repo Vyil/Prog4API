@@ -73,7 +73,38 @@ function addSpullen(req, res) {
 
 }
 
+function getSpulByID(req,res){
+    let token = req.get('Authorization')
+
+    let categorieID = req.params.id || ''
+    let spulID = req.params.spullid || ''
+
+    if (!token) {
+        res.status(401).json(new ApiResponse(401, 'Niet geautoriseerd (geen valid token)')).end()
+        return
+    }
+
+
+    db.query('SELECT * FROM categorie WHERE ID = ?', [categorieID], function (error, rows, fields) {
+        if (!rows[0]) {
+            res.status(404).json(new ApiResponse(404, 'Niet gevonden (categorieId bestaat niet)')).end()
+            return
+        } else {
+            db.query('SELECT * FROM spullen WHERE ID = ?',[spulID], function(err,row,field){
+                if(!row[0]){
+                    res.status(404).json(new ApiResponse(404, 'Niet gevonden (spullenID bestaat niet)')).end()
+                    return
+                } else {
+                    res.status(200).json(new ApiResponse(200,row)).end()
+                }
+            })
+        }
+    })
+
+}
+
 module.exports = {
     getAllSpullen,
-    addSpullen
+    addSpullen,
+    getSpulByID
 }
