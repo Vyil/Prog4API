@@ -127,7 +127,7 @@ function editCategorie(req, res) {
             return
         }
         if (!rows[0].UserID == id.sub) {
-            res.status(401).json(new ApiResponse(401, 'Niet geautoriseerd (geen valid token)')).end()
+            res.status(409).json(new ApiResponse(409, 'Conflict (Gebruiker mag deze data niet wijzigen)')).end()
             return
         } else {
             let query = {
@@ -157,13 +157,45 @@ function editCategorie(req, res) {
             })
         }
     })
+}
 
+function deleteCategorie(req,res){
+    let token = req.get('Authorization')
+    let removeBearer = token.substr(7)
+    let id = auth.decodeToken(removeBearer)
 
+    let categorieID = req.params.id || ''
+
+    if (!token) {
+        res.status(401).json(new ApiResponse(401, 'Niet geautoriseerd (geen valid token)')).end()
+        return
+    }
+
+    db.query('SELECT * FROM categorie WHERE ID = ?',[categorieID], function(error,rows,fields){
+        if(!rows[0]){
+            res.status(404).json(new ApiResponse(404, 'Niet gevonden (categorieId bestaat niet)')).end()
+            return
+        } else {
+            if(!rows[0].UserID == id.sub){
+                res.status(409).json(new ApiResponse(409, 'Conflict (Gebruiker mag deze data niet verwijderen)')).end()
+                return
+            } else {
+                db.query('DELETE FROM categorie WHERE ID = ?',[categorieID], function(err,row,field){
+                    if(err){
+                        res.status(500).json(new ApiResponse(500, err)).end()
+                    } else {
+                        res.status(200).json(new ApiResponse(200, 'Categorie verwijderd met ID: '+ categorieID)).end()
+                    }
+                })
+            }
+        }
+    })
 }
 
 module.exports = {
     getAllCategories,
     makeCategorie,
     getCategorieByID,
-    editCategorie
+    editCategorie,
+    deleteCategorie
 }

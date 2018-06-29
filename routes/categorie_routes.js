@@ -5,5 +5,6 @@ routes.get('/',catg.getAllCategories)
 routes.post('/', catg.makeCategorie)
 routes.get('/:id',catg.getCategorieByID)
 routes.put('/:id',catg.editCategorie)
+routes.delete('/:id',catg.deleteCategorie)
 
 module.exports = routes
