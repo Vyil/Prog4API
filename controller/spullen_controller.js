@@ -38,11 +38,11 @@ function addSpullen(req, res) {
         res.status(401).json(new ApiResponse(401, 'Niet geautoriseerd (geen valid token)')).end()
         return
     }
-    if(!categorieID || categorieID==''|| !naam || naam==''|| !beschrijving || beschrijving ==''
-        || !merk || merk == ''|| !soort|| soort==''|| !bouwjaar || bouwjaar==''){
-            res.status(412).json(new ApiResponse(412, 'Een of meer properties in de request body ontbreken of zijn foutief')).end()
-            return
-        }
+    if (!categorieID || categorieID == '' || !naam || naam == '' || !beschrijving || beschrijving == '' ||
+        !merk || merk == '' || !soort || soort == '' || !bouwjaar || bouwjaar == '') {
+        res.status(412).json(new ApiResponse(412, 'Een of meer properties in de request body ontbreken of zijn foutief')).end()
+        return
+    }
 
     db.query('SELECT * FROM categorie WHERE ID = ?', [categorieID], function (error, rows, fields) {
         if (!rows[0]) {
@@ -73,7 +73,7 @@ function addSpullen(req, res) {
 
 }
 
-function getSpulByID(req,res){
+function getSpulByID(req, res) {
     let token = req.get('Authorization')
 
     let categorieID = req.params.id || ''
@@ -90,12 +90,12 @@ function getSpulByID(req,res){
             res.status(404).json(new ApiResponse(404, 'Niet gevonden (categorieId bestaat niet)')).end()
             return
         } else {
-            db.query('SELECT * FROM spullen WHERE ID = ?',[spulID], function(err,row,field){
-                if(!row[0]){
+            db.query('SELECT * FROM spullen WHERE ID = ?', [spulID], function (err, row, field) {
+                if (!row[0]) {
                     res.status(404).json(new ApiResponse(404, 'Niet gevonden (spullenID bestaat niet)')).end()
                     return
                 } else {
-                    res.status(200).json(new ApiResponse(200,row)).end()
+                    res.status(200).json(new ApiResponse(200, row)).end()
                 }
             })
         }
@@ -103,7 +103,7 @@ function getSpulByID(req,res){
 
 }
 
-function editSpul(req,res){
+function editSpul(req, res) {
     let token = req.get('Authorization')
     let removeBearer = token.substr(7)
     let id = auth.decodeToken(removeBearer)
@@ -120,42 +120,47 @@ function editSpul(req,res){
         res.status(401).json(new ApiResponse(401, 'Niet geautoriseerd (geen valid token)')).end()
         return
     }
-    if(!naam || naam ==''|| !beschrijving || beschrijving==''|| !merk || merk==''||
-        !soort || soort ==''|| !bouwjaar || bouwjaar == ''|| !categorieID|| categorieID==''||!spulID || spulID ==''){
-            res.status(412).json(new ApiResponse(412, 'Een of meer properties in de request body ontbreken of zijn foutief')).end()
-            return
-        }
+    if (!naam || naam == '' || !beschrijving || beschrijving == '' || !merk || merk == '' ||
+        !soort || soort == '' || !bouwjaar || bouwjaar == '' || !categorieID || categorieID == '' || !spulID || spulID == '') {
+        res.status(412).json(new ApiResponse(412, 'Een of meer properties in de request body ontbreken of zijn foutief')).end()
+        return
+    }
 
-    db.query('SELECT * FROM categorie WHERE ID =?',[categorieID], function(error,rows,fields){
-        if(!rows[0]){
+    db.query('SELECT * FROM categorie WHERE ID =?', [categorieID], function (error, rows, fields) {
+        if (!rows[0]) {
             res.status(404).json(new ApiResponse(404, 'Niet gevonden (categorieId bestaat niet)')).end()
             return
         } else {
-            db.query('SELECT * FROM spullen WHERE ID = ?',[spulID],function(err,row,field){
-                if(!row[0]){
+            db.query('SELECT * FROM spullen WHERE ID = ?', [spulID], function (err, row, field) {
+                if (!row[0]) {
                     res.status(404).json(new ApiResponse(404, 'Niet gevonden (spullenID bestaat niet)')).end()
                     return
                 } else {
-                    let query = {
-                        sql: 'UPDATE spullen SET Naam = ?, Beschrijving = ?, Merk = ?, Soort = ?, Bouwjaar = ? WHERE ID = ? ',
-                        values: [naam, beschrijving, merk, soort, bouwjaar, spulID],
-                        timeout: 3000
-                    }
-                    db.query(query, function(error,rows,fields){
-                        if(err){
-                            res.status(500).json(new ApiResponse(500, error)).end()
-                        } else {
-                            let returnObject = {
-                                "ID": spulID,
-                                "naam": naam,
-                                "beschrijving": beschrijving,
-                                "merk": merk,
-                                "soort": soort,
-                                "bouwjaar": bouwjaar
-                            }
-                            res.status(200).json(new ApiResponse(200, returnObject)).end()
+                    if (!row[0].UserID == id.sub) {
+                        res.status(409).json(new ApiResponse(409, 'Conflict (Gebruiker mag deze data niet wijzigen)')).end()
+                        return
+                    } else {
+                        let query = {
+                            sql: 'UPDATE spullen SET Naam = ?, Beschrijving = ?, Merk = ?, Soort = ?, Bouwjaar = ? WHERE ID = ? ',
+                            values: [naam, beschrijving, merk, soort, bouwjaar, spulID],
+                            timeout: 3000
                         }
-                    })
+                        db.query(query, function (error, rows, fields) {
+                            if (err) {
+                                res.status(500).json(new ApiResponse(500, error)).end()
+                            } else {
+                                let returnObject = {
+                                    "ID": spulID,
+                                    "naam": naam,
+                                    "beschrijving": beschrijving,
+                                    "merk": merk,
+                                    "soort": soort,
+                                    "bouwjaar": bouwjaar
+                                }
+                                res.status(200).json(new ApiResponse(200, returnObject)).end()
+                            }
+                        })
+                    }
                 }
             })
         }
