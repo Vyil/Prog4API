@@ -115,13 +115,18 @@ function editCategorie(req, res) {
         res.status(412).json(new ApiResponse(412, 'Een of meer properties in de request body ontbreken of zijn foutief')).end()
         return
     }
+
     if (!token) {
         res.status(401).json(new ApiResponse(401, 'Niet geautoriseerd (geen valid token)')).end()
         return
     }
 
     db.query('SELECT * FROM categorie WHERE ID = ?', [categorieID], function (error, rows, fields) {
-        if (!rows[0].UserID == id) {
+        if(!rows[0]){
+            res.status(404).json(new ApiResponse(404, 'Niet gevonden (categorieId bestaat niet)')).end()
+            return
+        }
+        if (!rows[0].UserID == id.sub) {
             res.status(401).json(new ApiResponse(401, 'Niet geautoriseerd (geen valid token)')).end()
             return
         } else {
