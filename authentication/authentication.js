@@ -20,12 +20,13 @@ function decodeToken(token, callback) {
         // Check if the token has expired
         const now = moment().unix();
         if(now > payload.exp) {
-            callback('Token has expired', null);
-        } else {
-            callback(null, payload);
-        }
+            console.log('Token has expired', null);
+        } 
+        
+        return payload
+        
     } catch(error) {
-        callback(error, null);
+        console.log(error, null);
     }
 }
 

@@ -8,6 +8,7 @@ const PORT = process.env.PORT || 3000;
 
 //Route files
 let authentication_routes = require('./routes/authentication_routes')
+let categorie_routes = require('./routes/categorie_routes')
 
 // Use Body Parser to get properties from body in posts
 app.use(bodyParser.json())
@@ -19,6 +20,7 @@ app.get('/', function (req, res, next) {
 
 //Routes
 app.use('/auth', authentication_routes)
+app.use('/categorie', categorie_routes)
 
 //Catch 404's 
 app.use('*', function (req, res) {
