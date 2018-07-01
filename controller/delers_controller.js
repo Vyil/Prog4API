@@ -73,10 +73,6 @@ function meldAan (req, res){
             })
         } 
     })
-
-
-
-
 }
 
 function deleteDeler(req, res){
@@ -84,7 +80,6 @@ function deleteDeler(req, res){
     let removeBearer = token.substr(7)
     let id = auth.decodeToken(removeBearer)
 
-    let UserID = req.params.UserID|| ''
     let categorieID = req.params.id || ''
     let spulID = req.params.spullid || ''
 
@@ -92,37 +87,28 @@ function deleteDeler(req, res){
     if (!token) {
         res.status(401).json(new ApiResponse(401, 'Niet geautoriseerd (geen valid token)')).end()
         return
-    }
+    }    
 
-    auth.decodeToken(token, (err, payload) => {
-        const query = {
-            sql: 'SELECT * FROM delers WHERE UserID= ? AND categorieID= ? AND spullenID =? ' ,
-            values: [UserID,categorieID,spulID],
-        };
-    
-        db.query( query, (error, rows, fields) => {
-                if (rows.length>0) {
-                    const query = { 
-                        sql: 'Delete FROM delers WHERE UserID= ? AND categorieID= ? AND spullenID =? ',
-                        values: [UserID,categorieID,spulID],
-                    };
-                
-                    db.query( query, (error, rows, fields) => {
-                            if (error) {
-                                res.status(404).send("Niet gevonden (categorieId of spullenId bestaat niet)")
-                            } else {
-                                res.status(200).json(rows)
-                            }
-                        });
-                } else {
-                    res.status(409).send({
-                        "Message": "Conflict (Gebruiker mag deze data niet verwijderen)"
-                    });
-                }
-            });
-
-
-    });
+    db.query('SELECT * FROM delers WHERE categorieID= ? AND spullenID = ?',[categorieID, spulID], function(error,rows,fields){
+        if(!rows[0]){
+            res.status(404).json(new ApiResponse(404, 'Niet gevonden (geen delers gevonden op deze IDs)')).end()
+            return
+        } else {
+            if(!rows[0].UserID == id.sub){
+                res.status(409).json(new ApiResponse(409, 'Conflict (Gebruiker mag deze data niet verwijderen)')).end()
+                return
+            } else {
+                db.query('DELETE FROM delers WHERE UserID = ?',[id.sub], function(err,row,field){
+                    if(err){
+                        res.status(500).json(new ApiResponse(500, err)).end()
+                        return
+                    } else {
+                        res.status(200).json(new ApiResponse(200, 'Deler verwijderd met ID: '+ id.sub)).end()
+                    }
+                })
+            }
+        }
+    })
 }
 
 module.exports = {
