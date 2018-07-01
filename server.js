@@ -10,6 +10,7 @@ const PORT = process.env.PORT || 3000;
 let authentication_routes = require('./routes/authentication_routes')
 let categorie_routes = require('./routes/categorie_routes')
 let spullen_routes = require('./routes/spullen_routes')
+let deler_routes = require('./routes/delers_routes')
 
 // Use Body Parser to get properties from body in posts
 app.use(bodyParser.json())
@@ -23,6 +24,7 @@ app.get('/', function (req, res, next) {
 app.use('/api', authentication_routes)
 app.use('/api/categorie', categorie_routes)
 app.use('/api/categorie',spullen_routes)
+app.use('/api/categorie', deler_routes)
 
 //Catch 404's 
 app.use('*', function (req, res) {
