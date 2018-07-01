@@ -24,26 +24,29 @@ function getAllCategories(req, res) {
 function makeCategorie(req, res) {
 
     let token = req.get('Authorization')
-    let removeBearer = token.substr(7)
-    let id = auth.decodeToken(removeBearer)
-
     if (!token) {
         res.status(401).json(new ApiResponse(401, 'Niet geautoriseerd (geen valid token)')).end()
         return
     }
 
-    try{
-        var catg = new categorieModel(req.body.naam, req.body.beschrijving)
+    let removeBearer = token.substr(7)
+    let id = auth.decodeToken(removeBearer)
+    var catg
 
+
+    try {
+        catg = new categorieModel(req.body.naam, req.body.beschrijving)
+
+        console.log(id.sub)
         let query = {
             sql: 'INSERT INTO categorie (Naam, Beschrijving, UserID) VALUES (?,?,?)',
             values: [catg.naam, catg.beschrijving, id.sub],
             timeout: 3000
         }
-    
+
         db.query('SELECT * FROM categorie WHERE Naam = ?', [catg.naam], function (error, rows, fields) {
             if (rows.length > 0) {
-                res.status(401).json(new ApiResponse(401, 'Categorie bestaat al')).end()
+                res.status(412).json(new ApiResponse(412, 'Categorie bestaat al')).end()
                 return
             } else {
                 db.query(query, function (error, rows, fields) {
@@ -61,28 +64,31 @@ function makeCategorie(req, res) {
                                 "beheerder": row[0].Voornaam,
                                 "email": row[0].Email
                             }
-                            res.status(200).json(new ApiResponse(200, returnObject)).end()
+                            res.status(200).json(returnObject).end()
                         })
                     }
                 })
             }
         })
-    }catch(ex){
-        res.status(412).json(412, new ApiResponse(412,ex.toString()))
+    } catch (ex) {
+        res.status(412).json(412, new ApiResponse(412, ex.toString()))
         return
     }
 }
 
 function getCategorieByID(req, res) {
     let token = req.get('Authorization')
-    let removeBearer = token.substr(7)
-    let id = auth.decodeToken(removeBearer)
-    let urlID = req.params.id
 
     if (!token) {
         res.status(401).json(new ApiResponse(401, 'Niet geautoriseerd (geen valid token)')).end()
         return
     }
+
+    let removeBearer = token.substr(7)
+    let id = auth.decodeToken(removeBearer)
+    let urlID = req.params.id
+
+
 
     db.query('SELECT * FROM categorie WHERE ID = ?', [urlID], function (error, rows, fields) {
         if (!rows[0]) {
@@ -105,12 +111,17 @@ function getCategorieByID(req, res) {
 
 function editCategorie(req, res) {
     let token = req.get('Authorization')
+
+    if (!token) {
+        res.status(401).json(new ApiResponse(401, 'Niet geautoriseerd (geen valid token)')).end()
+        return
+    }
     let removeBearer = token.substr(7)
     let id = auth.decodeToken(removeBearer)
 
     let categorieID = req.params.id || ''
-
-    if (!naam || naam == '' || !beschrijving || beschrijving == '' || !categorieID || categorieID == '') {
+    var catg
+    if (!naam || !beschrijving) {
         res.status(412).json(new ApiResponse(412, 'Een of meer properties in de request body ontbreken of zijn foutief')).end()
         return
     }
@@ -118,10 +129,13 @@ function editCategorie(req, res) {
     if (!token) {
         res.status(401).json(new ApiResponse(401, 'Niet geautoriseerd (geen valid token)')).end()
         return
+    } else {
+        removeBearer = token.substr(7)
+        id = auth.decodeToken(removeBearer)
     }
 
-    try{
-        var catg = new categorieModel(req.body.naam, req.body.beschrijving)
+    try {
+        catg = new categorieModel(req.body.naam, req.body.beschrijving)
         db.query('SELECT * FROM categorie WHERE ID = ?', [categorieID], function (error, rows, fields) {
             if (!rows[0]) {
                 res.status(404).json(new ApiResponse(404, 'Niet gevonden (categorieId bestaat niet)')).end()
@@ -141,7 +155,7 @@ function editCategorie(req, res) {
                         res.status(500).json(new ApiResponse(500, err)).end()
                         return
                     } else {
-    
+
                         db.query('SELECT * FROM user WHERE ID = ?', [id.sub], function (err, row, field) {
                             let responseObject = {
                                 "ID": categorieID,
@@ -151,30 +165,30 @@ function editCategorie(req, res) {
                                 "email": row[0].Email
                             }
                             res.status(200).json(new ApiResponse(200, responseObject)).end()
-    
+
                         })
-    
+
                     }
                 })
             }
         })
-    }catch(ex){
-        res.status(412).json(412, new ApiResponse(412,ex.toString()))
+    } catch (ex) {
+        res.status(412).json(412, new ApiResponse(412, ex.toString()))
         return
     }
 }
 
 function deleteCategorie(req, res) {
     let token = req.get('Authorization')
+    if (!token) {
+        res.status(401).json(new ApiResponse(401, 'Niet geautoriseerd (geen valid token)')).end()
+        return
+    } 
+
     let removeBearer = token.substr(7)
     let id = auth.decodeToken(removeBearer)
 
     let categorieID = req.params.id || ''
-
-    if (!token) {
-        res.status(401).json(new ApiResponse(401, 'Niet geautoriseerd (geen valid token)')).end()
-        return
-    }
 
     db.query('SELECT * FROM categorie WHERE ID = ?', [categorieID], function (error, rows, fields) {
         if (!rows[0]) {

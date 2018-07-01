@@ -9,6 +9,7 @@ function login(req, res) {
     let email = req.body.email
     let password = req.body.password
 
+    var user
     //Check if parameters exist
     if (!email || !password) {
         res.status(412).json(new ApiResponse(412, 'Een of meer properties in de request body ontbreken of zijn foutief')).end()
@@ -16,7 +17,7 @@ function login(req, res) {
     }
 
     try {
-        var user = new uLog(req.body.email, req.body.password)
+        user = new uLog(req.body.email, req.body.password)
 
         //Check if user exists
         db.query('SELECT * FROM user WHERE Email = ?', [user.email], function (error, rows, fields) {
@@ -25,7 +26,7 @@ function login(req, res) {
                 return
                 //If exists we go on
             } else {
-                db.query('SELECT Email, Password FROM user WHERE Email = ?', [user.email], function (errors, rows, fields) {
+                db.query('SELECT ID, Email, Password FROM user WHERE Email = ?', [user.email], function (errors, rows, fields) {
                     //Handle error
                     if (error) {
                         res.status(500).json(new ApiResponse(500, error)).end()
@@ -47,32 +48,29 @@ function login(req, res) {
             }
         })
     } catch (ex) {
-        res.status(412).json(412, new ApiResponse(412,ex.toString()))
+        res.status(412).json(412, new ApiResponse(412, ex.toString()))
         return
     }
 }
 
 function register(req, res) {
 
-    let firstname = req.body.firstname
-    let lastname = req.body.lastname
-    let email = req.body.email
-    let password = req.body.password
+    var user
 
-    if (!firstname || firstname == '' || !lastname || lastname == '' || !email || email == '' || !password || password == '') {
+    if (!req.body.firstname || !req.body.lastname || !req.body.email || !req.body.password) {
         res.status(412).json(new ApiResponse(412, 'Een of meer properties in de request body ontbreken of zijn foutief')).end()
         return
     }
 
-    try{
-        var user = new uRegister(req.body.firstname, req.body.lastname, req.body.email, req.body.password)
+    try {
+        user = new uRegister(req.body.firstname, req.body.lastname, req.body.email, req.body.password)
 
         let queryUser = {
             sql: 'INSERT INTO user (Voornaam, Achternaam, Email, Password) VALUES (?,?,?,?)',
             values: [user.firstname, user.lastname, user.email, user.password],
             timeout: 3000
         }
-    
+
         db.query('SELECT Email FROM user WHERE Email = ?', [user.email], function (error, rows, fields) {
             if (rows.length > 0) {
                 res.status(406).json(new ApiResponse(406, 'Email bestaat al')).end()
@@ -95,8 +93,8 @@ function register(req, res) {
                 })
             }
         })
-    }catch(ex){
-        res.status(412).json(412, new ApiResponse(412,ex.toString()))
+    } catch (ex) {
+        res.status(412).json(412, new ApiResponse(412, ex.toString()))
         return
     }
 }

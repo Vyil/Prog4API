@@ -33,7 +33,6 @@ describe('Registration', function() {
         chai.request(server)
             .post('/api/register')
             .send({
-                
                 firstname: "Djim",
                 lastname: "oomes",
                 password: "test123",
