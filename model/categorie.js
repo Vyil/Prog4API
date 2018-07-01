@@ -4,8 +4,6 @@ const ApiResponse = require('../model/ApiResponse')
 class categorie {
     constructor(naam, beschrijving) {
 
-        this.error = true
-
         try {
             assert(typeof (naam) === 'string', 'naam must be a string')
             assert(typeof (beschrijving) === 'string', 'beschrijving must be a string.')
@@ -18,7 +16,6 @@ class categorie {
 
         this.naam = naam
         this.beschrijving = beschrijving
-        this.error = false
     }
 }
 
