@@ -36,7 +36,7 @@ function meldAan(req, res) {
     let categorieID = req.params.id || ''
     let spullenID = req.params.spullid || ''
 
-    db.query('SELECT * FROM delers WHERE categorieID= ? AND spullenID =? ', [categorieID, spullenID], function (error, rows, fields) {
+    db.query('SELECT * FROM spullen WHERE categorieID= ? AND ID =? ', [categorieID, spullenID], function (error, rows, fields) {
         if (error) {
             res.status(500).json(new ApiResponse(500, error)).end()
             return
@@ -46,8 +46,8 @@ function meldAan(req, res) {
             return
         } else {
 
-            db.query('SELECT UserID FROM delers WHERE UserID = ?', [id.sub], function (err, row, field) {
-                if (!row[0]) {
+            db.query('SELECT UserID, spullenID FROM delers WHERE UserID = ?, spullenID = ?', [id.sub,spullenID], function (err, row, field) {
+                if (!row) {
                     let insertQuery = {
                         sql: 'INSERT INTO delers (UserID, categorieID, spullenID) VALUES (?,?,?) ',
                         values: [id.sub, categorieID, spullenID],
@@ -94,19 +94,21 @@ function deleteDeler(req, res) {
             res.status(404).json(new ApiResponse(404, 'Niet gevonden (geen delers gevonden op deze IDs)')).end()
             return
         } else {
-            if (rows[0].UserID != id.sub) {
-                res.status(409).json(new ApiResponse(409, 'Conflict (Gebruiker mag deze data niet verwijderen)')).end()
-                return
-            } else {
-                db.query('DELETE FROM delers WHERE UserID = ?', [id.sub], function (err, row, field) {
-                    if (err) {
-                        res.status(500).json(new ApiResponse(500, err)).end()
-                        return
-                    } else {
-                        res.status(200).json(new ApiResponse(200, 'Deler verwijderd met ID: ' + id.sub)).end()
-                    }
-                })
-            }
+            db.query('SELECT * FROM delers WHERE UserID = ? AND spullenID = ?',[id.sub, spulID], function(error,rows,fields){
+                if (rows[0].UserID != id.sub) {
+                    res.status(409).json(new ApiResponse(409, 'Conflict (Gebruiker mag deze data niet verwijderen)')).end()
+                    return
+                } else {
+                    db.query('DELETE FROM delers WHERE UserID = ? AND spullenID = ?', [id.sub, spulID], function (err, row, field) {
+                        if (err) {
+                            res.status(500).json(new ApiResponse(500, err)).end()
+                            return
+                        } else {
+                            res.status(200).json(new ApiResponse(200, 'Deler verwijderd met ID: ' + id.sub)).end()
+                        }
+                    })
+                }
+            })
         }
     })
 }

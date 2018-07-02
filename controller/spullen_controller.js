@@ -143,6 +143,7 @@ function editSpul(req, res) {
                                 timeout: 3000
                             }
                             db.query(query, function (error, rows, fields) {
+
                                 if (err) {
                                     res.status(500).json(new ApiResponse(500, error)).end()
                                 } else {
