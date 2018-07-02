@@ -133,7 +133,7 @@ function editSpul(req, res) {
                         res.status(404).json(new ApiResponse(404, 'Niet gevonden (spullenID bestaat niet)')).end()
                         return
                     } else {
-                        if (!row[0].UserID == id.sub) {
+                        if (row[0].UserID != id.sub) {
                             res.status(409).json(new ApiResponse(409, 'Conflict (Gebruiker mag deze data niet wijzigen)')).end()
                             return
                         } else {
@@ -192,7 +192,7 @@ function deleteSpul(req, res) {
                     res.status(404).json(new ApiResponse(404, 'Niet gevonden (spullenID bestaat niet)')).end()
                     return
                 } else {
-                    if (!row[0].UserID == id.sub) {
+                    if (row[0].UserID != id.sub) {
                         res.status(409).json(new ApiResponse(409, 'Conflict (Gebruiker mag deze data niet wijzigen)')).end()
                         return
                     } else {

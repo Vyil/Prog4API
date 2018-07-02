@@ -94,7 +94,7 @@ function deleteDeler(req, res) {
             res.status(404).json(new ApiResponse(404, 'Niet gevonden (geen delers gevonden op deze IDs)')).end()
             return
         } else {
-            if (!rows[0].UserID == id.sub) {
+            if (rows[0].UserID != id.sub) {
                 res.status(409).json(new ApiResponse(409, 'Conflict (Gebruiker mag deze data niet verwijderen)')).end()
                 return
             } else {
