@@ -139,7 +139,7 @@ function editSpul(req, res) {
                         } else {
                             let query = {
                                 sql: 'UPDATE spullen SET Naam = ?, Beschrijving = ?, Merk = ?, Soort = ?, Bouwjaar = ? WHERE ID = ? ',
-                                values: [spul.naam, spul.beschrijving, spul.merk, spul.soort, spul.bouwjaar, spul.spulID],
+                                values: [spul.naam, spul.beschrijving, spul.merk, spul.soort, spul.bouwjaar, spulID],
                                 timeout: 3000
                             }
                             db.query(query, function (error, rows, fields) {
