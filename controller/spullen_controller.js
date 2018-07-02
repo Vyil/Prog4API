@@ -6,12 +6,12 @@ const spullenModel = require('../model/spullen')
 function getAllSpullen(req, res) {
     let token = req.get('Authorization')
 
-    let categorieID = req.params.id || ''
-
     if (!token) {
         res.status(401).json(new ApiResponse(401, 'Niet geautoriseerd (geen valid token)')).end()
         return
     }
+
+    let categorieID = req.params.id || ''
 
     db.query('SELECT * FROM spullen WHERE categorieID = ?', [categorieID], function (error, rows, fields) {
         if (!rows[0]) {
@@ -25,15 +25,15 @@ function getAllSpullen(req, res) {
 
 function addSpullen(req, res) {
     let token = req.get('Authorization')
-    let removeBearer = token.substr(7)
-    let id = auth.decodeToken(removeBearer)
-
-    let categorieID = req.params.id || ''
 
     if (!token) {
         res.status(401).json(new ApiResponse(401, 'Niet geautoriseerd (geen valid token)')).end()
         return
     }
+    let removeBearer = token.substr(7)
+    let id = auth.decodeToken(removeBearer)
+
+    let categorieID = req.params.id || ''
 
     if (!req.body.naam || !req.body.beschrijving || !req.body.merk || !req.body.soort || !req.body.bouwjaar) {
         res.status(412).json(new ApiResponse(412, 'Een of meer properties in de request body ontbreken of zijn foutief')).end()
@@ -76,15 +76,13 @@ function addSpullen(req, res) {
 
 function getSpulByID(req, res) {
     let token = req.get('Authorization')
-
-    let categorieID = req.params.id || ''
-    let spulID = req.params.spullid || ''
-
     if (!token) {
         res.status(401).json(new ApiResponse(401, 'Niet geautoriseerd (geen valid token)')).end()
         return
     }
 
+    let categorieID = req.params.id || ''
+    let spulID = req.params.spullid || ''
 
     db.query('SELECT * FROM categorie WHERE ID = ?', [categorieID], function (error, rows, fields) {
         if (!rows[0]) {
@@ -106,16 +104,17 @@ function getSpulByID(req, res) {
 
 function editSpul(req, res) {
     let token = req.get('Authorization')
+    if (!token) {
+        res.status(401).json(new ApiResponse(401, 'Niet geautoriseerd (geen valid token)')).end()
+        return
+    }
+
     let removeBearer = token.substr(7)
     let id = auth.decodeToken(removeBearer)
 
     let categorieID = req.params.id || ''
     let spulID = req.params.spullid || ''
 
-    if (!token) {
-        res.status(401).json(new ApiResponse(401, 'Niet geautoriseerd (geen valid token)')).end()
-        return
-    }
     if (!req.body.naam ||  !req.body.beschrijving ||  !req.body.merk ||!req.body.soort ||  !req.body.bouwjaar ) {
         res.status(412).json(new ApiResponse(412, 'Een of meer properties in de request body ontbreken of zijn foutief')).end()
         return
@@ -171,16 +170,17 @@ function editSpul(req, res) {
 
 function deleteSpul(req, res) {
     let token = req.get('Authorization')
-    let removeBearer = token.substr(7)
-    let id = auth.decodeToken(removeBearer)
-
-    let categorieID = req.params.id || ''
-    let spulID = req.params.spullid || ''
 
     if (!token) {
         res.status(401).json(new ApiResponse(401, 'Niet geautoriseerd (geen valid token)')).end()
         return
     }
+
+    let removeBearer = token.substr(7)
+    let id = auth.decodeToken(removeBearer)
+
+    let categorieID = req.params.id || ''
+    let spulID = req.params.spullid || ''
 
     db.query('SELECT * FROM categorie WHERE ID =?', [categorieID], function (error, rows, fields) {
         if (!rows[0]) {
