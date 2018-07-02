@@ -121,100 +121,94 @@ function editCategorie(req, res) {
 
     let categorieID = req.params.id || ''
     var catg
-    if (!naam || !beschrijving) {
+    if (!req.body.naam || !req.body.beschrijving) {
         res.status(412).json(new ApiResponse(412, 'Een of meer properties in de request body ontbreken of zijn foutief')).end()
         return
-    }
-
-    if (!token) {
-        res.status(401).json(new ApiResponse(401, 'Niet geautoriseerd (geen valid token)')).end()
-        return
-    } else {
-        removeBearer = token.substr(7)
-        id = auth.decodeToken(removeBearer)
     }
 
     try {
         catg = new categorieModel(req.body.naam, req.body.beschrijving)
         db.query('SELECT * FROM categorie WHERE ID = ?', [categorieID], function (error, rows, fields) {
+                if (!rows[0]) {
+                    res.status(404).json(new ApiResponse(404, 'Niet gevonden (categorieId bestaat niet)')).end()
+                    return
+                } else {
+                    if (rows[0].UserID != id.sub) {
+                        res.status(409).json(new ApiResponse(409, 'Conflict (Gebruiker mag deze data niet wijzigen)')).end()
+                        return
+                    } else {
+                        let query = {
+                            sql: 'UPDATE categorie SET Naam = ?, Beschrijving = ? WHERE ID = ? ',
+                            values: [catg.naam, catg.beschrijving, categorieID],
+                            timeout: 3000
+                        }
+                        db.query(query, function (err, row, field) {
+                            if (err) {
+                                res.status(500).json(new ApiResponse(500, err)).end()
+                                return
+                            } else {
+
+                                db.query('SELECT * FROM user WHERE ID = ?', [id.sub], function (err, row, field) {
+                                    let responseObject = {
+                                        "ID": categorieID,
+                                        "naam": catg.naam,
+                                        "beschrijving": catg.beschrijving,
+                                        "beheerder": row[0].Voornaam,
+                                        "email": row[0].Email
+                                    }
+                                    res.status(200).json(new ApiResponse(200, responseObject)).end()
+
+                                })
+
+                            }
+                        })
+                    }
+                }
+            })
+        }
+        catch (ex) {
+            res.status(412).json(412, new ApiResponse(412, ex.toString()))
+            return
+        }
+}
+
+    function deleteCategorie(req, res) {
+        let token = req.get('Authorization')
+        if (!token) {
+            res.status(401).json(new ApiResponse(401, 'Niet geautoriseerd (geen valid token)')).end()
+            return
+        }
+
+        let removeBearer = token.substr(7)
+        let id = auth.decodeToken(removeBearer)
+
+        let categorieID = req.params.id || ''
+
+        db.query('SELECT * FROM categorie WHERE ID = ?', [categorieID], function (error, rows, fields) {
             if (!rows[0]) {
                 res.status(404).json(new ApiResponse(404, 'Niet gevonden (categorieId bestaat niet)')).end()
                 return
-            }
-            if (!rows[0].UserID == id.sub) {
-                res.status(409).json(new ApiResponse(409, 'Conflict (Gebruiker mag deze data niet wijzigen)')).end()
-                return
             } else {
-                let query = {
-                    sql: 'UPDATE categorie SET Naam = ?, Beschrijving = ? WHERE ID = ? ',
-                    values: [catg.naam, catg.beschrijving, categorieID],
-                    timeout: 3000
+                if (!rows[0].UserID == id.sub) {
+                    res.status(409).json(new ApiResponse(409, 'Conflict (Gebruiker mag deze data niet verwijderen)')).end()
+                    return
+                } else {
+                    db.query('DELETE FROM categorie WHERE ID = ?', [categorieID], function (err, row, field) {
+                        if (err) {
+                            res.status(500).json(new ApiResponse(500, err)).end()
+                        } else {
+                            res.status(200).json(new ApiResponse(200, 'Categorie verwijderd met ID: ' + categorieID)).end()
+                        }
+                    })
                 }
-                db.query(query, function (err, row, field) {
-                    if (err) {
-                        res.status(500).json(new ApiResponse(500, err)).end()
-                        return
-                    } else {
-
-                        db.query('SELECT * FROM user WHERE ID = ?', [id.sub], function (err, row, field) {
-                            let responseObject = {
-                                "ID": categorieID,
-                                "naam": catg.naam,
-                                "beschrijving": catg.beschrijving,
-                                "beheerder": row[0].Voornaam,
-                                "email": row[0].Email
-                            }
-                            res.status(200).json(new ApiResponse(200, responseObject)).end()
-
-                        })
-
-                    }
-                })
             }
         })
-    } catch (ex) {
-        res.status(412).json(412, new ApiResponse(412, ex.toString()))
-        return
     }
-}
 
-function deleteCategorie(req, res) {
-    let token = req.get('Authorization')
-    if (!token) {
-        res.status(401).json(new ApiResponse(401, 'Niet geautoriseerd (geen valid token)')).end()
-        return
-    } 
-
-    let removeBearer = token.substr(7)
-    let id = auth.decodeToken(removeBearer)
-
-    let categorieID = req.params.id || ''
-
-    db.query('SELECT * FROM categorie WHERE ID = ?', [categorieID], function (error, rows, fields) {
-        if (!rows[0]) {
-            res.status(404).json(new ApiResponse(404, 'Niet gevonden (categorieId bestaat niet)')).end()
-            return
-        } else {
-            if (!rows[0].UserID == id.sub) {
-                res.status(409).json(new ApiResponse(409, 'Conflict (Gebruiker mag deze data niet verwijderen)')).end()
-                return
-            } else {
-                db.query('DELETE FROM categorie WHERE ID = ?', [categorieID], function (err, row, field) {
-                    if (err) {
-                        res.status(500).json(new ApiResponse(500, err)).end()
-                    } else {
-                        res.status(200).json(new ApiResponse(200, 'Categorie verwijderd met ID: ' + categorieID)).end()
-                    }
-                })
-            }
-        }
-    })
-}
-
-module.exports = {
-    getAllCategories,
-    makeCategorie,
-    getCategorieByID,
-    editCategorie,
-    deleteCategorie
-}
+    module.exports = {
+        getAllCategories,
+        makeCategorie,
+        getCategorieByID,
+        editCategorie,
+        deleteCategorie
+    }

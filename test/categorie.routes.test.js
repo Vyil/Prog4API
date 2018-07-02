@@ -106,4 +106,107 @@ describe('makeCategorie', function() {
             done();
         });
     });
+
+    it('should give error and status 412 on wrong parameter', (done) => {
+        setTimeout(done, 10000);
+        chai.request(server)
+            .post('/api/categorie')
+            .send({
+                "naam": 1,
+                "beschrijving": "Vaag item"
+            })
+            .set('Authorization', tokenWithIDOne)
+            .end((error, response) => {
+            response.should.have.status(412);
+            response.should.be.a('object');
+
+            const body = response.body;
+            body.should.have.property('message');
+            done();
+        });
+    });
+});
+
+describe('getCategorieByID', function() {
+    this.timeout(10000);
+
+    it('should give status 200 on succefull request', (done) => {
+        setTimeout(done, 10000);
+        chai.request(server)
+            .get('/api/categorie/1')
+            .send({
+                
+            })
+            .set('Authorization', tokenWithIDOne)
+            .end((error, response) => {
+            response.should.have.status(200);
+            response.should.be.a('object');
+
+            const body = response.body;
+            body.should.have.property('message');
+            done();
+        });
+    });
+
+    it('should give status 404 on non existing ID', (done) => {
+        setTimeout(done, 10000);
+        chai.request(server)
+            .get('/api/categorie/9999')
+            .send({
+                
+            })
+            .set('Authorization', tokenWithIDOne)
+            .end((error, response) => {
+            response.should.have.status(404);
+            response.should.be.a('object');
+
+            const body = response.body;
+            body.should.have.property('message');
+            done();
+        });
+    });
+
+});
+
+describe('editCategorie', function() {
+    this.timeout(10000);
+
+    it('should give status 200 on succefull edit', (done) => {
+        setTimeout(done, 10000);
+        chai.request(server)
+            .put('/api/categorie/1')
+            .send({
+                "naam": "EdittedCategorie",
+                "beschrijving":"editted by test case"
+            })
+            .set('Authorization', tokenWithIDOne)
+            .end((error, response) => {
+            response.should.have.status(200);
+            response.should.be.a('object');
+
+            const body = response.body;
+            body.should.have.property('message');
+            done();
+        });
+    });
+
+    it('should give status 409 on non matching user ID and categorie ID', (done) => {
+        setTimeout(done, 10000);
+        chai.request(server)
+            .put('/api/categorie/1')
+            .send({
+                "naam": "EdittedCategorie(shouldnt work)",
+                "beschrijving":"editted by test case"
+            })
+            .set('Authorization', tokenWithIDTwo)
+            .end((error, response) => {
+            response.should.have.status(409);
+            response.should.be.a('object');
+
+            const body = response.body;
+            body.should.have.property('message');
+            done();
+        });
+    });
+
 });
