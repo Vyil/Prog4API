@@ -199,7 +199,7 @@ function deleteSpul(req, res) {
                     } else {
                         db.query('DELETE FROM spullen WHERE ID = ?', [spulID], function (err, row, field) {
                             if (err) {
-                                res.status(500).json(new ApiResponse(500, err))
+                                res.status(500).json(new ApiResponse(500, err)).end()
                             } else {
                                 res.status(200).json(new ApiResponse(200, 'Verwijderd spul met ID: ' + spulID)).end()
                             }
