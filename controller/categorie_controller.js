@@ -37,12 +37,11 @@ function makeCategorie(req, res) {
     try {
         catg = new categorieModel(req.body.naam, req.body.beschrijving)
 
-        console.log(id.sub)
         let query = {
             sql: 'INSERT INTO categorie (Naam, Beschrijving, UserID) VALUES (?,?,?)',
             values: [catg.naam, catg.beschrijving, id.sub],
             timeout: 3000
-        }
+        }       
 
         db.query('SELECT * FROM categorie WHERE Naam = ?', [catg.naam], function (error, rows, fields) {
             if (rows.length > 0) {
@@ -56,15 +55,23 @@ function makeCategorie(req, res) {
                         db.query('SELECT * FROM user WHERE ID = ?', [id.sub], function (err, row, field) {
                             if (error) {
                                 res.status(500).json(new ApiResponse(500, error)).end()
+                            } else {
+                                Voornaam = row[0].Voornaam
+                                Email = row[0].Email
+                                db.query('SELECT * FROM categorie WHERE Naam = ?',[catg.naam], function(error,rows,fields){
+                                    if(error){
+                                        res.status(500).json(new ApiResponse(500, error)).end()
+                                    }
+                                    let returnObject = {
+                                        "categorieID": rows[0].ID,
+                                        "naam": catg.naam,
+                                        "beschrijving": catg.beschrijving,
+                                        "beheerder": Voornaam,
+                                        "email": Email
+                                    }
+                                    res.status(200).json(returnObject).end()
+                                })
                             }
-                            let returnObject = {
-                                "ID": id.sub,
-                                "naam": catg.naam,
-                                "beschrijving": catg.beschrijving,
-                                "beheerder": row[0].Voornaam,
-                                "email": row[0].Email
-                            }
-                            res.status(200).json(returnObject).end()
                         })
                     }
                 })
