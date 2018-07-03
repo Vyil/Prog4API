@@ -43,6 +43,22 @@ describe('getAllSpullen', function() {
             done()
         });
     });
+
+    it('should throw an error when no valid id is supplied', (done) => {
+        setTimeout(done, 10000);
+        chai.request(server)
+            .get('/api/categorie/2222/spullen')
+            .send({
+               
+            })
+            .set('Authorization', tokenWithIDOne)
+            .end((error, response) => {
+            response.should.have.status(404);
+            response.should.be.a('object');
+
+            done()
+        });
+    });
 });
 
 describe('addSpullen', function() {
@@ -69,7 +85,7 @@ describe('addSpullen', function() {
         });
     });
 
-    it('should throw an error when categorie already exists', (done) => {
+    it('should throw an error when Spullen already exists', (done) => {
         setTimeout(done, 10000);
         chai.request(server)
             .post('/api/categorie/2/spullen')
@@ -135,6 +151,27 @@ describe('addSpullen', function() {
             done();
         });
     });
+
+    it('should throw an error when no valid id is supplied', (done) => {
+        setTimeout(done, 10000);
+        chai.request(server)
+            .post('/api/categorie/2222/spullen')
+            .send({
+                "naam": "testuser",
+                "beschrijving": "testbeschrijving",
+                "merk": "testmerk",
+                "soort": "testsoort",
+                "bouwjaar": 2018
+        
+            })
+            .set('Authorization', tokenWithIDOne)
+            .end((error, response) => {
+            response.should.have.status(404);
+            response.should.be.a('object');
+
+            done()
+        });
+    });
 });
 
 describe('getSpulByID', function() {
@@ -155,6 +192,23 @@ describe('getSpulByID', function() {
             const body = response.body;
             body.should.have.property('message');
             done();
+        });
+    });
+
+    it('should throw an error when no token is supplied', (done) => {
+        chai.request(server)
+            .get('/api/categorie/2/spullen/3')
+            .send({
+                
+            })
+            .end((error, response) => {
+            response.should.have.status(401);
+            response.should.be.a('object');
+
+            const body = response.body;
+            body.should.have.property('status').equals(401);
+            body.should.have.property('message');
+            done()
         });
     });
 
@@ -181,7 +235,7 @@ describe('getSpulByID', function() {
 describe('editSpul', function() {
     this.timeout(10000);
 
-    it('should give status 200 on succefull edit', (done) => {
+    it('should give status 200 on succefull put', (done) => {
         setTimeout(done, 10000);
         chai.request(server)
             .put('/api/categorie/2/spullen/3')
@@ -203,10 +257,10 @@ describe('editSpul', function() {
         });
     });
 
-    it('should give status 409 on non matching user ID and categorie ID', (done) => {
+    it('should give status 409 when a user is not allowed to change data', (done) => {
         setTimeout(done, 10000);
         chai.request(server)
-            .put('/api/categorie/1')
+            .put('/api/categorie/2/spullen/3')
             .send({
                 "naam": "testusereditdddddddd",
                 "beschrijving": "testbeschrijving",
@@ -225,12 +279,55 @@ describe('editSpul', function() {
         });
     });
 
+    it('should give error and status 412 on wrong parameter', (done) => {
+        setTimeout(done, 10000);
+        chai.request(server)
+            .put('/api/categorie/2/spullen/3')
+            .send({
+                "naam": 2,
+                "beschrijving": "testbeschrijving",
+                "merk": "testmerk",
+                "soort": "testsoort",
+                "bouwjaar": 2018
+            })
+            .set('Authorization', tokenWithIDOne)
+            .end((error, response) => {
+            response.should.have.status(412);
+            response.should.be.a('object');
+
+            const body = response.body;
+            body.should.have.property('message');
+            done();
+        });
+    });
+
+    it('should throw an error when no token is supplied', (done) => {
+        chai.request(server)
+            .put('/api/categorie/2/spullen/3')
+            .send({
+                "naam": "testuser",
+                "beschrijving": "testbeschrijving",
+                "merk": "testmerk",
+                "soort": "testsoort",
+                "bouwjaar": 2018
+            })
+            .end((error, response) => {
+            response.should.have.status(401);
+            response.should.be.a('object');
+
+            const body = response.body;
+            body.should.have.property('status').equals(401);
+            body.should.have.property('message');
+            done()
+        });
+    });
+
 });
 
 describe('deleteSpul', function() {
     this.timeout(10000);
 
-    it('should give status 200 on succefull edit', (done) => {
+    it('should give status 200 on succefull delete', (done) => {
         setTimeout(done, 10000);
         chai.request(server)
             .delete('/api/categorie/2/spullen/3')
