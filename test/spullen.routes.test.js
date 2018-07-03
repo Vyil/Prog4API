@@ -43,6 +43,96 @@ describe('getAllSpullen', function() {
             done()
         });
     });
+});
 
+describe('addSpullen', function() {
+    this.timeout(10000);
 
-})
+    it('should throw an error when no token is supplied', (done) => {
+        chai.request(server)
+            .post('/api/categorie/2/spullen')
+            .send({
+                "naam": "testuser",
+                "beschrijving": "testbeschrijving",
+                "merk": "testmerk",
+                "soort": "testsoort",
+                "bouwjaar": 2018
+            })
+            .end((error, response) => {
+            response.should.have.status(401);
+            response.should.be.a('object');
+
+            const body = response.body;
+            body.should.have.property('status').equals(401);
+            body.should.have.property('message');
+            done()
+        });
+    });
+
+    it('should throw an error when categorie already exists', (done) => {
+        setTimeout(done, 10000);
+        chai.request(server)
+            .post('/api/categorie/2/spullen')
+            .send({
+                "naam": "testuser",
+                "beschrijving": "testbeschrijving",
+                "merk": "testmerk",
+                "soort": "testsoort",
+                "bouwjaar": 2018
+            })
+            .set('Authorization', tokenWithIDOne)
+            .end((error, response) => {
+            response.should.have.status(412);
+            response.should.be.a('object');
+
+            const body = response.body;
+            body.should.have.property('status').equals(412);
+            body.should.have.property('message');
+            done();
+        });
+    });
+
+    it('should give status 200 on succesfull add spullen', (done) => {
+        setTimeout(done, 10000);
+        chai.request(server)
+            .post('/api/categorie/2/spullen')
+            .send({
+                "naam": "testuser",
+                "beschrijving": "testbeschrijving",
+                "merk": "testmerk",
+                "soort": "testsoort",
+                "bouwjaar": 2018
+            })
+            .set('Authorization', tokenWithIDOne)
+            .end((error, response) => {
+            response.should.have.status(200);
+            response.should.be.a('object');
+
+            const body = response.body;
+            body.should.have.property('beheerder');
+            done();
+        });
+    });
+
+    it('should give error and status 412 on wrong parameter', (done) => {
+        setTimeout(done, 10000);
+        chai.request(server)
+            .post('/api/categorie/2/spullen')
+            .send({
+                "naam": "testuser",
+                "beschrijving": "testbeschrijving",
+                "merk": "testmerk",
+                "soort": "testsoort",
+                "bouwjaar": 2018
+            })
+            .set('Authorization', tokenWithIDOne)
+            .end((error, response) => {
+            response.should.have.status(412);
+            response.should.be.a('object');
+
+            const body = response.body;
+            body.should.have.property('message');
+            done();
+        });
+    });
+});
