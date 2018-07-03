@@ -143,3 +143,25 @@ describe('meldAan', function() {
     });
 
 });
+
+describe('deleteDeler', function() {
+    this.timeout(10000);
+
+    it('should give status 200 on succefull delete', (done) => {
+        setTimeout(done, 10000);
+        chai.request(server)
+            .delete('/api/categorie/2/spullen/3/delers')
+            .send({
+                
+            })
+            .set('Authorization', tokenWithIDOne)
+            .end((error, response) => {
+            response.should.have.status(200);
+            response.should.be.a('object');
+
+            const body = response.body;
+            body.should.have.property('message');
+            done();
+        });
+    });
+});
