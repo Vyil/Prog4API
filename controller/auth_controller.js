@@ -17,6 +17,7 @@ function login(req, res) {
     }
 
     try {
+        //Go to model with asserts, if fails go to catch
         user = new uLog(req.body.email, req.body.password)
 
         //Check if user exists
@@ -57,12 +58,14 @@ function register(req, res) {
 
     var user
 
+    //Check if parameters exist
     if (!req.body.firstname || !req.body.lastname || !req.body.email || !req.body.password) {
         res.status(412).json(new ApiResponse(412, 'Een of meer properties in de request body ontbreken of zijn foutief')).end()
         return
     }
 
     try {
+        //Asserts with domain model
         user = new uRegister(req.body.firstname, req.body.lastname, req.body.email, req.body.password)
 
         let queryUser = {
@@ -71,6 +74,7 @@ function register(req, res) {
             timeout: 3000
         }
 
+        //Check if email exists
         db.query('SELECT Email FROM user WHERE Email = ?', [user.email], function (error, rows, fields) {
             if (rows.length > 0) {
                 res.status(406).json(new ApiResponse(406, 'Email bestaat al')).end()

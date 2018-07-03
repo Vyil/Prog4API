@@ -17,7 +17,7 @@ app.use(bodyParser.json())
 
 // Hello World, Used for pinging the server
 app.get('/', function (req, res, next) {
-    res.send('Hello World')
+    res.send('Start (end)point')
 })
 
 //Routes
