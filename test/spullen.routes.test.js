@@ -119,7 +119,7 @@ describe('addSpullen', function() {
         chai.request(server)
             .post('/api/categorie/2/spullen')
             .send({
-                "naam": "testuser",
+                "naam": 2,
                 "beschrijving": "testbeschrijving",
                 "merk": "testmerk",
                 "soort": "testsoort",
@@ -135,4 +135,45 @@ describe('addSpullen', function() {
             done();
         });
     });
+});
+
+describe('getSpulByID', function() {
+    this.timeout(10000);
+
+    it('should give status 200 on succefull request', (done) => {
+        setTimeout(done, 10000);
+        chai.request(server)
+            .get('/api/categorie/2/spullen/3')
+            .send({
+                
+            })
+            .set('Authorization', tokenWithIDOne)
+            .end((error, response) => {
+            response.should.have.status(200);
+            response.should.be.a('object');
+
+            const body = response.body;
+            body.should.have.property('message');
+            done();
+        });
+    });
+
+    it('should give status 404 on non existing ID', (done) => {
+        setTimeout(done, 10000);
+        chai.request(server)
+            .get('/api/categorie/2/spullen/323')
+            .send({
+                
+            })
+            .set('Authorization', tokenWithIDOne)
+            .end((error, response) => {
+            response.should.have.status(404);
+            response.should.be.a('object');
+
+            const body = response.body;
+            body.should.have.property('message');
+            done();
+        });
+    });
+
 });
