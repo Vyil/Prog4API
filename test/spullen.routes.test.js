@@ -177,3 +177,52 @@ describe('getSpulByID', function() {
     });
 
 });
+
+describe('editSpul', function() {
+    this.timeout(10000);
+
+    it('should give status 200 on succefull edit', (done) => {
+        setTimeout(done, 10000);
+        chai.request(server)
+            .put('/api/categorie/2/spullen/3')
+            .send({
+                "naam": "testuseredit",
+                "beschrijving": "testbeschrijving",
+                "merk": "testmerk",
+                "soort": "testsoort",
+                "bouwjaar": 2018
+            })
+            .set('Authorization', tokenWithIDOne)
+            .end((error, response) => {
+            response.should.have.status(200);
+            response.should.be.a('object');
+
+            const body = response.body;
+            body.should.have.property('message');
+            done();
+        });
+    });
+
+    it('should give status 409 on non matching user ID and categorie ID', (done) => {
+        setTimeout(done, 10000);
+        chai.request(server)
+            .put('/api/categorie/1')
+            .send({
+                "naam": "testusereditdddddddd",
+                "beschrijving": "testbeschrijving",
+                "merk": "testmerk",
+                "soort": "testsoort",
+                "bouwjaar": 2018
+            })
+            .set('Authorization', tokenWithIDTwo)
+            .end((error, response) => {
+            response.should.have.status(409);
+            response.should.be.a('object');
+
+            const body = response.body;
+            body.should.have.property('message');
+            done();
+        });
+    });
+
+});
