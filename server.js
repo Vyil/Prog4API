@@ -15,7 +15,7 @@ let deler_routes = require('./routes/delers_routes')
 // Use Body Parser to get properties from body in posts
 app.use(bodyParser.json())
 
-// Hello World, Used for pinging the server
+// Start, Used for pinging the server
 app.get('/', function (req, res, next) {
     res.send('Start (end)point')
 })
